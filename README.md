@@ -6,14 +6,6 @@ The tool expects the tracker repository to be present locally so it can read
 the `data/CVE/list` file and locate upstream patch references.
 
 Clone the security tracker repository:
-## Debian Security Tracker Dependency
-
-This prototype reads vulnerability metadata from the Debian security tracker.
-
-The tool expects the tracker repository to be present locally so it can read
-the `data/CVE/list` file and locate upstream patch references.
-
-Clone the security tracker repository:
 git clone https://salsa.debian.org/security-tracker-team/security-tracker.git
 
 The pipeline reads CVE entries from:
@@ -29,7 +21,7 @@ diff for analysis.
 
 # Attack of the Clones – Patch Based Code Clone Detection (PoC)
 
-This repository contains a small proof-of-concept prototype built while exploring the **"Attack of the Clones"** project idea from the Debian GSoC project list.
+This repository contains a small proof-of-concept prototype built while exploring the **"Attack of the Clones"** project idea from the Debian GSoC 2026 project list.
 
 The goal of the project is to investigate whether security patches can be used to automatically detect **duplicated vulnerable code across a large software archive** such as Debian.
 
@@ -53,7 +45,7 @@ The prototype pipeline implemented here attempts to:
 The workflow implemented in this repository looks like this:
 
 Debian Security Tracker
-      ↓
+      - ↓
 Extract upstream patch
       ↓
 Analyze patch diff
