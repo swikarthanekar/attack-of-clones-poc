@@ -44,17 +44,12 @@ The prototype pipeline implemented here attempts to:
 
 The workflow implemented in this repository looks like this:
 
-Debian Security Tracker
-      - ↓
-Extract upstream patch
-      ↓
-Analyze patch diff
-      ↓
-Generate vulnerability signature
-      ↓
-Search Debian archive (codesearch.debian.net)
-      ↓
-Generate attack-of-clone report
+-Debian Security Tracker
+-Extract upstream patch
+-Analyze patch diff
+-Generate vulnerability signature
+-Search Debian archive (codesearch.debian.net)
+-Generate attack-of-clone report
 
 The system is intentionally simple.  
 The focus here is on experimenting with the idea rather than building a production-ready tool.
