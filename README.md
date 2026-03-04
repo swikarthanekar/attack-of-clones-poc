@@ -44,16 +44,14 @@ The prototype pipeline implemented here attempts to:
 
 The workflow implemented in this repository looks like this:
 
--Debian Security Tracker
--Extract upstream patch
--Analyze patch diff
--Generate vulnerability signature
--Search Debian archive (codesearch.debian.net)
--Generate attack-of-clone report
-
-The system is intentionally simple.  
-The focus here is on experimenting with the idea rather than building a production-ready tool.
-
+```
+Debian Security Tracker
+Extract upstream patch
+Analyze patch diff
+Generate vulnerability signature
+Search Debian archive (codesearch.debian.net)
+Generate attack-of-clone report
+```
 ---
 
 # Vulnerability Patterns Currently Detected
@@ -110,31 +108,32 @@ the analyzer extracts the removed unsafe function and creates a search signature
 ```
 |
 ├─ attack_of_clone_poc
-|    │
+|    |
 |    ├─ scripts
-|    │  attack_of_clone.py
-|    │  cve_to_signature.py
-|    │  analyze_patch.py
-|    │  analyze_memcpy_patch.py
-|    │  analyze_unsafe_copy_patch.py
-|    │  clone_scanner.py
-|    │  generate_report.py
-|    │
+|    |  attack_of_clone.py
+|    |  cve_to_signature.py
+|    |  analyze_patch.py
+|    |  analyze_memcpy_patch.py
+|    |  analyze_unsafe_copy_patch.py
+|    |  clone_scanner.py
+|    |  generate_report.py
+|    |
 |    ├─ samples
-|    │  sample_patch.patch
-|    │  libtiff_patch.patch
-|    │  unsafe_copy_test.patch
-|    │
+|    |  sample_patch.patch
+|    |  libtiff_patch.patch
+|    |  unsafe_copy_test.patch
+|    |
 |    ├─ signatures
-|    │  (generated vulnerability signatures)
-|    │
+|    |  (generated vulnerability signatures)
+|    |
 |    ├─ reports
-|    │  attack_of_clone_report.md
-|    │
+|    |  attack_of_clone_report.md
+|    |
 |    ├─ requirements.txt
 |    └─ README.md
 │
 ├─ security-tracker
+    |
     ├─ data
         ├─ CVE
             ├─ list
@@ -190,19 +189,18 @@ This will:
 # Example Output
 
 Example pipeline execution:
-=== Attack of Clone pipeline for CVE-2026-28420 ===
-
-[+] searching tracker for CVE
-[+] downloading upstream patch
-[+] analyzing patch diff
-[+] generating vulnerability signature
-[+] querying Debian codesearch
-[+] generating report
-
+=== Attack of Clone pipeline for CVE-2026-28420 ===<br>
+[+] searching tracker for CVE<br>
+[+] downloading upstream patch<br>
+[+] analyzing patch diff<br>
+[+] generating vulnerability signature<br>
+[+] querying Debian codesearch<br>
+[+] generating report<br>
+<br>
 Pipeline finished.
 
 
-The final report is saved as:
+The final report is saved as:<br>
 reports/attack_of_clone_report.md
 
 ---
