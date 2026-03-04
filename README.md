@@ -46,10 +46,15 @@ The workflow implemented in this repository looks like this:
 
 ```
 Debian Security Tracker
+        ↓
 Extract upstream patch
+        ↓
 Analyze patch diff
+        ↓
 Generate vulnerability signature
+        ↓
 Search Debian archive (codesearch.debian.net)
+        ↓
 Generate attack-of-clone report
 ```
 ---
@@ -188,7 +193,7 @@ This will:
 
 # Example Output
 
-Example pipeline execution:
+Example pipeline execution:<br>
 === Attack of Clone pipeline for CVE-2026-28420 ===<br>
 [+] searching tracker for CVE<br>
 [+] downloading upstream patch<br>
