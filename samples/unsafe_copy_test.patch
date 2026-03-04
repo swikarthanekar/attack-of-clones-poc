@@ -1,0 +1,13 @@
+diff --git a/example.c b/example.c
+index 123..456 100644
+--- a/example.c
++++ b/example.c
+@@
+- strcpy(buf, input);
++ strncpy(buf, input, sizeof(buf));
+
+- sprintf(buffer, "%s", data);
++ snprintf(buffer, sizeof(buffer), "%s", data);
+
+- memcpy(dst, src, len);
++ memcpy(dst, src, safe_len);
