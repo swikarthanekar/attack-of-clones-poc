@@ -16,21 +16,6 @@ the `data/CVE/list` file and locate upstream patch references.
 Clone the security tracker repository:
 git clone https://salsa.debian.org/security-tracker-team/security-tracker.git
 
-
-Place it **next to this project directory**, not inside it.
-
-Expected layout:
-├── attack_of_clone_poc
-│ ├── scripts
-│ ├── samples
-│ ├── reports
-│ └── README.md
-│
-└── security-tracker
-└── data
-└── CVE
-└── list
-
 The pipeline reads CVE entries from:
 security-tracker/data/CVE/list
 
@@ -136,30 +121,36 @@ the analyzer extracts the removed unsafe function and creates a search signature
 # Repository Structure
 
 ```
-attack_of_clone_poc
+|
+├─ attack_of_clone_poc
+|    │
+|    ├─ scripts
+|    │  attack_of_clone.py
+|    │  cve_to_signature.py
+|    │  analyze_patch.py
+|    │  analyze_memcpy_patch.py
+|    │  analyze_unsafe_copy_patch.py
+|    │  clone_scanner.py
+|    │  generate_report.py
+|    │
+|    ├─ samples
+|    │  sample_patch.patch
+|    │  libtiff_patch.patch
+|    │  unsafe_copy_test.patch
+|    │
+|    ├─ signatures
+|    │  (generated vulnerability signatures)
+|    │
+|    ├─ reports
+|    │  attack_of_clone_report.md
+|    │
+|    ├─ requirements.txt
+|    └─ README.md
 │
-├─ scripts
-│  attack_of_clone.py
-│  cve_to_signature.py
-│  analyze_patch.py
-│  analyze_memcpy_patch.py
-│  analyze_unsafe_copy_patch.py
-│  clone_scanner.py
-│  generate_report.py
-│
-├─ samples
-│  sample_patch.patch
-│  libtiff_patch.patch
-│  unsafe_copy_test.patch
-│
-├─ signatures
-│  (generated vulnerability signatures)
-│
-├─ reports
-│  attack_of_clone_report.md
-│
-├─ requirements.txt
-└─ README.md
+├─ security-tracker
+    ├─ data
+        ├─ CVE
+            ├─ list
 ```
 
 The Debian **security-tracker dataset is expected to be located outside this directory**:
