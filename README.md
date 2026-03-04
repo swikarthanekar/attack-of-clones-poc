@@ -1,3 +1,47 @@
+## Debian Security Tracker Dependency
+
+This prototype reads vulnerability metadata from the Debian security tracker.
+
+The tool expects the tracker repository to be present locally so it can read
+the `data/CVE/list` file and locate upstream patch references.
+
+Clone the security tracker repository:
+## Debian Security Tracker Dependency
+
+This prototype reads vulnerability metadata from the Debian security tracker.
+
+The tool expects the tracker repository to be present locally so it can read
+the `data/CVE/list` file and locate upstream patch references.
+
+Clone the security tracker repository:
+git clone https://salsa.debian.org/security-tracker-team/security-tracker.git
+
+
+Place it **next to this project directory**, not inside it.
+
+Expected layout:
+├── attack_of_clone_poc
+│ ├── scripts
+│ ├── samples
+│ ├── reports
+│ └── README.md
+│
+└── security-tracker
+└── data
+└── CVE
+└── list
+
+The pipeline reads CVE entries from:
+security-tracker/data/CVE/list
+
+Each CVE entry often contains a reference to the upstream commit that fixed
+the vulnerability. The prototype extracts that commit and downloads the patch
+diff for analysis.
+
+
+
+
+
 # Attack of the Clones – Patch Based Code Clone Detection (PoC)
 
 This repository contains a small proof-of-concept prototype built while exploring the **"Attack of the Clones"** project idea from the Debian GSoC project list.
@@ -34,7 +78,6 @@ Generate vulnerability signature
 Search Debian archive (codesearch.debian.net)
       ↓
 Generate attack-of-clone report
-
 
 The system is intentionally simple.  
 The focus here is on experimenting with the idea rather than building a production-ready tool.
@@ -226,3 +269,10 @@ This work was done while exploring the Debian GSoC project idea:
 The goal was to better understand the workflow described in the project proposal and experiment with possible approaches.
 
 ---
+
+## Status
+
+This repository is an experimental prototype built while exploring
+possible approaches for the Debian GSoC "Attack of the Clones" idea.
+The implementation focuses on understanding the workflow rather than
+building a production-ready detection system.
