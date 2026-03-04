@@ -250,10 +250,3 @@ This work was done while exploring the Debian GSoC project idea:
 The goal was to better understand the workflow described in the project proposal and experiment with possible approaches.
 
 ---
-
-## Status
-
-This repository is an experimental prototype built while exploring
-possible approaches for the Debian GSoC "Attack of the Clones" idea.
-The implementation focuses on understanding the workflow rather than
-building a production-ready detection system.
