@@ -194,7 +194,7 @@ This will:
 # Example Output
 
 Example pipeline execution:<br>
-=== Attack of Clone pipeline for CVE-2026-28420 ===<br>
+ Attack of Clone pipeline for CVE-2026-28420 <br>
 [+] searching tracker for CVE<br>
 [+] downloading upstream patch<br>
 [+] analyzing patch diff<br>
