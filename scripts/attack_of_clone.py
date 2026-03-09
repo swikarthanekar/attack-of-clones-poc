@@ -9,7 +9,7 @@ def run(cmd):
     subprocess.run(cmd)
 
 def main(cve):
-    print(f"\n % Attack of Clone pipeline for {cve} % ")
+    print(f"\n Attack of Clone pipeline for {cve} ")
     run(["python", os.path.join(BASE_DIR, "scripts", "cve_to_signature.py"), cve])
     sig = os.path.join(BASE_DIR, "signatures", f"{cve}.json")
     run(["python", os.path.join(BASE_DIR, "scripts", "clone_scanner.py"), sig])
