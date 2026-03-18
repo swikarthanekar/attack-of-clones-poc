@@ -184,5 +184,3 @@ Built while exploring the Debian GSoC 2026 project:
 
 **"Attack Of The Clones: Fight Back Using Code Duplication Detection from
 Security Patches"**
-
-Mentor: Bastien Roucaries (rouca AT debian.org)
