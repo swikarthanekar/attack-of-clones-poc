@@ -1,252 +1,188 @@
-## Debian Security Tracker Dependency
+# Attack of the Clones – Patch-Based Code Clone Detection (PoC)
 
-This prototype reads vulnerability metadata from the Debian security tracker.
+A proof-of-concept prototype built while exploring the
+**"Attack of the Clones"** project idea from the Debian GSoC 2026 project list.
 
-The tool expects the tracker repository to be present locally so it can read
-the `data/CVE/list` file and locate upstream patch references.
+The goal is to automatically detect duplicated vulnerable code across the Debian
+archive by converting security patches into loose regex search signatures.
 
-Clone the security tracker repository:
-git clone https://salsa.debian.org/security-tracker-team/security-tracker.git
-
-The pipeline reads CVE entries from:
-security-tracker/data/CVE/list
-
-Each CVE entry often contains a reference to the upstream commit that fixed
-the vulnerability. The prototype extracts that commit and downloads the patch
-diff for analysis.
-
-
-
-
-
-# Attack of the Clones – Patch Based Code Clone Detection (PoC)
-
-This repository contains a small proof-of-concept prototype built while exploring the **"Attack of the Clones"** project idea from the Debian GSoC 2026 project list.
-
-The goal of the project is to investigate whether security patches can be used to automatically detect **duplicated vulnerable code across a large software archive** such as Debian.
-
-Security bugs often appear in multiple places because developers copy and reuse code.  
-When a vulnerability is fixed upstream, other copies of the same code may still remain unfixed elsewhere.  
-This project explores a simple way to detect such situations automatically.
-
-The prototype pipeline implemented here attempts to:
-
-1. Extract security patch information from the Debian security tracker
-2. Download the upstream patch that fixes the vulnerability
-3. Analyze the patch to identify the vulnerable coding pattern
-4. Convert the pattern into a loose regex signature
-5. Search the Debian source archive for similar code
-6. Generate a simple report describing the potential clone pattern
+When a vulnerability is fixed upstream, other copies of the same code may still
+exist unfixed in unrelated packages. This tool helps surface those copies.
 
 ---
 
-# How the Prototype Works
-
-The workflow implemented in this repository looks like this:
+## How It Works
 
 ```
 Debian Security Tracker
         ↓
-Extract upstream patch
+Extract upstream patch commit
         ↓
-Analyze patch diff
+Download patch diff
         ↓
-Generate vulnerability signature
+Extract removed (-) lines → generalize to RE2 regex patterns
         ↓
-Search Debian archive (codesearch.debian.net)
+Query codesearch.debian.net
         ↓
 Generate attack-of-clone report
 ```
----
 
-# Vulnerability Patterns Currently Detected
+The approach is intentionally simple: take every removed line from the patch
+diff, strip specifics (variable names → `\w+`, numbers → `\d+`, whitespace →
+`\s{1,10}`), and search the archive for the structural pattern that remains.
 
-While experimenting with patches, three common types of fixes were implemented.
-
-### 1. Missing Loop Upper Bound
-
-Example vulnerable pattern:
-for (i = 0; arr[i] != 0; ++i)
-
-Fix introduced in patch:
-for (i = 0; i < MAX && arr[i] != 0; ++i)
-
-
-The analyzer detects that a **loop boundary condition was added** and generates a signature that searches for similar loops without bounds.
+The regex patterns are kept compatible with
+[RE2](https://github.com/google/re2/wiki/Syntax) since
+[codesearch.debian.net](https://codesearch.debian.net) uses RE2 internally.
 
 ---
 
-### 2. Missing Validation Guard
+## Example
 
-Some vulnerabilities are fixed by adding input validation checks.
-
-Example patch fix:
-if (page_count < 1 || bnum + page_count > limit) {
-exit(EXIT_FAILURE);
-}
-
-
-The analyzer detects when **guard conditions are added before dangerous operations**.
-
----
-
-### 3. Unsafe Memory Copy Operations
-
-Certain vulnerabilities come from unsafe memory functions such as:
-strcpy
-memcpy
-sprintf
-
-
-If a patch replaces these with safer alternatives such as:
-strncpy
-snprintf
-checked memcpy
-
-
-the analyzer extracts the removed unsafe function and creates a search signature.
-
----
-
-# Repository Structure
+Running the pipeline on **CVE-2026-31897** (FreeRDP):
 
 ```
-|
-├─ attack_of_clone_poc
-|    |
-|    ├─ scripts
-|    |  attack_of_clone.py
-|    |  cve_to_signature.py
-|    |  analyze_patch.py
-|    |  analyze_memcpy_patch.py
-|    |  analyze_unsafe_copy_patch.py
-|    |  clone_scanner.py
-|    |  generate_report.py
-|    |
-|    ├─ samples
-|    |  sample_patch.patch
-|    |  libtiff_patch.patch
-|    |  unsafe_copy_test.patch
-|    |
-|    ├─ signatures
-|    |  (generated vulnerability signatures)
-|    |
-|    ├─ reports
-|    |  attack_of_clone_report.md
-|    |
-|    ├─ requirements.txt
-|    └─ README.md
+python3 scripts/attack_of_clone.py CVE-2026-31897
+```
+
+Output:
+```
+[+] found commit: https://github.com/FreeRDP/FreeRDP/commit/cd27c8f...
+[+] extracted 2 pattern(s)
+[+] pattern from: if (!pSrcData)
+    found 3 match(es)
+    → util-linux_2.41.3-4 : libblkid/src/superblocks/bitlocker.c
+    → util-linux_2.41.3-4 : lib/mangle.c
+    → util-linux_2.41.3-4 : lsfd-cmd/lsfd.c
+[+] pattern from: WLog_ERR(TAG, "Invalid argument pSrcData=nullptr");
+    found 5 match(es)
+    → qtbase-opensource-src_5.15.17+dfsg-7 : src/3rdparty/libpng/pngrtran.c
+    → mariadb_1:11.8.6-3 : libmariadb/unittest/libmariadb/ps_bugs.c
+    ...
+Total matches across all patterns: 8
+[+] report written to reports/CVE-2026-31897_report.md
+```
+
+---
+
+## Repository Structure
+
+```
+attack-of-clones-poc/
+├── scripts/
+│   ├── attack_of_clone.py       main pipeline orchestrator
+│   ├── cve_to_signature.py      CVE lookup + patch download + signature generation
+│   ├── analyze_patch.py         patch diff → RE2 regex signatures
+│   ├── clone_scanner.py         codesearch.debian.net query + result parser
+│   └── generate_report.py       Markdown report generator
 │
-├─ security-tracker
-    |
-    ├─ data
-        ├─ CVE
-            ├─ list
-```
-
-The Debian **security-tracker dataset is expected to be located outside this directory**:
-
-```
-clone/
+├── samples/
+│   ├── sample_patch.patch       vim terminal buffer overflow (CVE-2026-28420)
+│   └── libtiff_patch.patch      libtiff buffer overflow sample
 │
-├─ attack_of_clone_poc
-└─ security-tracker
+├── signatures/                  generated signature JSON files
+├── reports/                     generated Markdown reports
+├── requirements.txt
+└── README.md
 ```
 
-The prototype reads CVE patch metadata from:
+The Debian security tracker repository must be cloned alongside this repo:
 
 ```
-security-tracker/data/CVE/list
+parent/
+├── attack-of-clones-poc/
+└── security-tracker/          ← clone from salsa.debian.org
 ```
 
-# Requirements
-
-Python 3.10+ should work fine.
-
-Install dependencies:
-
+Clone the tracker:
+```bash
+git clone https://salsa.debian.org/security-tracker-team/security-tracker.git
 ```
+
+---
+
+## Setup
+
+Python 3.10+ required.
+
+```bash
 pip install -r requirements.txt
 ```
 
+---
+
+## Usage
+
+### Full pipeline from CVE ID
+
+```bash
+python3 scripts/attack_of_clone.py CVE-XXXX-XXXX
+```
+
+Looks up the CVE in the Debian tracker, downloads the upstream patch, extracts
+patterns, queries codesearch, and writes a report.
+
+### Local patch file (bypass tracker)
+
+```bash
+python3 scripts/attack_of_clone.py CVE-XXXX-XXXX --patch samples/my_patch.patch
+```
+
+Useful for testing or for CVEs where the tracker commit points to a non-C patch.
+
+### Analyze a patch directly
+
+```bash
+python3 scripts/analyze_patch.py samples/sample_patch.patch
+```
+
+Prints the extracted patterns and generated signatures as JSON.
 
 ---
 
-# Running the Prototype
+## Regex Generalization Strategy
 
-The easiest way to run the full pipeline is:
-python scripts/attack_of_clone.py CVE-XXXX-XXXX
+For each removed line from the patch diff, the analyzer:
 
-Example:
-python scripts/attack_of_clone.py CVE-2026-28420
+1. Strips language-specific sigils (`$` in PHP/Perl)
+2. Escapes the line with `re.escape()`
+3. Unescapes characters that RE2 treats as invalid escapes (`&`, `;`, `=`, etc.)
+4. Replaces identifiers with `\w+`
+5. Replaces numeric literals with `\d+`
+6. Collapses whitespace to `\s{1,10}` (RE2 does not support `\s+`)
 
-This will:
-
-1. Look up the CVE in the Debian security tracker
-2. Find the upstream commit that fixed the vulnerability
-3. Download the patch
-4. Analyze the patch to derive a vulnerability signature
-5. Search for similar code using Debian codesearch
-6. Generate a simple report
+Lines are ranked by usefulness (function calls > comparisons > control flow)
+and the top 10 patterns per patch are used for searching.
 
 ---
 
-# Example Output
+## Limitations
 
-Example pipeline execution:<br>
- Attack of Clone pipeline for CVE-2026-28420 <br>
-[+] searching tracker for CVE<br>
-[+] downloading upstream patch<br>
-[+] analyzing patch diff<br>
-[+] generating vulnerability signature<br>
-[+] querying Debian codesearch<br>
-[+] generating report<br>
-<br>
-Pipeline finished.
-
-
-The final report is saved as:<br>
-reports/attack_of_clone_report.md
+- Regex signatures may produce false positives — results need manual review.
+- The tracker does not always link to a C patch; non-C patches produce fewer
+  useful patterns (the tool warns when this is detected).
+- Codesearch results are limited to the first page per query.
+- Pattern generalization is structural, not semantic.
 
 ---
 
-# Limitations
+## Motivation
 
-This repository is only an early prototype.
+Debian contains tens of thousands of packages. Tracking duplicated vulnerable
+code across the entire archive manually is not feasible. If security patches
+can be automatically converted into search signatures, it becomes possible to
+identify unfixed clones at scale.
 
-Some limitations:
-
-* The pattern extraction is intentionally simple.
-* Regex signatures may produce false positives.
-* Only a few vulnerability patterns are currently supported.
-* Codesearch results are not deeply analyzed yet.
-
-A more complete system would likely require:
-
-* better pattern generalization
-* AST-based code analysis
-* integration with Debian package metadata
-* automatic triaging of potential clone matches
+This prototype demonstrates the core workflow described in the
+[Debian GSoC 2026 project idea](https://wiki.debian.org/SummerOfCode/Projects).
 
 ---
 
-# Motivation
+## Acknowledgement
 
-Large distributions like Debian contain **tens of thousands of packages**.  
-Tracking duplicated vulnerable code across such a large ecosystem is extremely difficult manually.
+Built while exploring the Debian GSoC 2026 project:
 
-If security patches can be converted into **automatic detection signatures**, it could help identify vulnerable clones that remain unfixed in other packages.
+**"Attack Of The Clones: Fight Back Using Code Duplication Detection from
+Security Patches"**
 
-This prototype explores that idea in a simple and practical way.
-
----
-
-# Acknowledgement
-
-This work was done while exploring the Debian GSoC project idea:
-
-**"Attack Of The Clones: Fight Back Using Code Duplication Detection from Security Patches"**
-
-The goal was to better understand the workflow described in the project proposal and experiment with possible approaches.
-
----
+Mentor: Bastien Roucaries (rouca AT debian.org)
