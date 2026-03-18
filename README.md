@@ -1,4 +1,4 @@
-# Attack of the Clones – Patch-Based Code Clone Detection (PoC)
+# Attack of the Clones - Patch-Based Code Clone Detection (PoC)
 
 A proof-of-concept prototype built while exploring the
 **"Attack of the Clones"** project idea from the Debian GSoC 2026 project list.
@@ -158,7 +158,7 @@ and the top 10 patterns per patch are used for searching.
 
 ## Limitations
 
-- Regex signatures may produce false positives — results need manual review.
+- Regex signatures may produce false positives - results need manual review.
 - The tracker does not always link to a C patch; non-C patches produce fewer
   useful patterns (the tool warns when this is detected).
 - Codesearch results are limited to the first page per query.
